@@ -1,5 +1,7 @@
 package bitfontain.juangomez.com.traveltracker;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -17,9 +19,11 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -27,8 +31,11 @@ public class MainActivity extends ActionBarActivity implements OnMapReadyCallbac
         GoogleApiClient.OnConnectionFailedListener, GoogleMap.OnMapClickListener {
 
     private static final String TAG = "MainActivity";
+    private static final String MEMORY_DIALOG_TAG = "MemoryDialog";
+
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
+    private HashMap<String, Memory> mMemories = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +59,8 @@ public class MainActivity extends ActionBarActivity implements OnMapReadyCallbac
         //Add this to be able to get coordinates when you click google maps.
         //Implement interface OnMapClickListener and get coordinates in its method
         mMap.setOnMapClickListener(this);
+        //We set our adapter and pass the layout inflater. The adapter is the one that creates the view for us
+        mMap.setInfoWindowAdapter(new MarkerAdapter(getLayoutInflater(), mMemories));
     }
 
     //Implement method from interface OnMapClickListener
@@ -76,10 +85,23 @@ public class MainActivity extends ActionBarActivity implements OnMapReadyCallbac
         //Log.d(TAG, "Best match is" + bestMatch);
         int maxLine = bestMatch.getMaxAddressLineIndex();
 
-        mMap.addMarker(new MarkerOptions()
-                .position(latLng)
-                .title(bestMatch.getAddressLine(maxLine - 1))
-                .snippet(bestMatch.getAddressLine(maxLine)));
+        Memory memory = new Memory();
+        memory.city = bestMatch.getAddressLine(maxLine -1);
+        memory.country = bestMatch.getAddressLine(maxLine);
+        memory.latitude = latLng.latitude;
+        memory.longitude = latLng.longitude;
+        memory.notes = "My notes...";
+
+        //Show Dialog
+        new MemoryDialogFragment().show(getFragmentManager(), MEMORY_DIALOG_TAG);
+
+        Marker marker = mMap.addMarker(new MarkerOptions()
+                //We need the position so it knows where to add the marker
+                .position(latLng));
+                /*.title(bestMatch.getAddressLine(maxLine - 1))
+                .snippet(bestMatch.getAddressLine(maxLine)));*/
+
+        mMemories.put(marker.getId(), memory);
     }
 
     @Override
