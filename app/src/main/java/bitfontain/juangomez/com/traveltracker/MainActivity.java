@@ -1,10 +1,14 @@
 package bitfontain.juangomez.com.traveltracker;
 
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.LinearLayout;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -12,10 +16,17 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.io.IOException;
+import java.util.List;
 
 
-public class MainActivity extends ActionBarActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class MainActivity extends ActionBarActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener, GoogleMap.OnMapClickListener {
 
+    private static final String TAG = "MainActivity";
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
 
@@ -27,7 +38,48 @@ public class MainActivity extends ActionBarActivity implements OnMapReadyCallbac
         MapFragment mapFragment = (MapFragment)getFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        addGoogleAPIClient();
+        //addGoogleAPIClient();
+    }
+
+    /*Implements this interface at the top OnMapReadyCallback
+        * Alt + Ins > Override Methods and add this method.
+        * This method is going to be called as soon the map is going to be loaded*/
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+        //Show current location on the maps
+        mMap.setMyLocationEnabled(true);
+        //Add this to be able to get coordinates when you click google maps.
+        //Implement interface OnMapClickListener and get coordinates in its method
+        mMap.setOnMapClickListener(this);
+    }
+
+    //Implement method from interface OnMapClickListener
+    //With this method we can get coordinates when we click the map
+    @Override
+    public void onMapClick(LatLng latLng) {
+
+        //Log.d(TAG, "Latlng is" + latLng);
+
+        Geocoder geocoder = new Geocoder(this);
+
+        List<Address> matches = null;
+
+        try {
+            //Last parameter 1 = maxResults: max number of addresses to return. Smaller numbers (1 to 5) are recommended
+            matches = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Address bestMatch = (matches.isEmpty()) ? null : matches.get(0);
+        //Log.d(TAG, "Best match is" + bestMatch);
+        int maxLine = bestMatch.getMaxAddressLineIndex();
+
+        mMap.addMarker(new MarkerOptions()
+                .position(latLng)
+                .title(bestMatch.getAddressLine(maxLine - 1))
+                .snippet(bestMatch.getAddressLine(maxLine)));
     }
 
     @Override
@@ -36,9 +88,10 @@ public class MainActivity extends ActionBarActivity implements OnMapReadyCallbac
 
         //Connects with the Google API. When it gets called it turns everything off.
         //If everything goes well onConnected method gets called and if something fails onConnectionFailed gets called
-        mGoogleApiClient.connect();
+        //mGoogleApiClient.connect();
     }
 
+    //Call this method in onStart and onCreate if you want to get coordinates back in onConnected method
     private void addGoogleAPIClient(){
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -67,17 +120,8 @@ public class MainActivity extends ActionBarActivity implements OnMapReadyCallbac
 
     }
 
-    /*************************************************************************************
+    /*************************************************************************************/
 
-    /*Implements this interface at the top OnMapReadyCallback
-        * Alt + Ins > Override Methods and add this method.
-        * This method is going to be called as soon the map is going to be loaded*/
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-        //Show current location on the map
-        mMap.setMyLocationEnabled(true);
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -100,4 +144,6 @@ public class MainActivity extends ActionBarActivity implements OnMapReadyCallbac
 
         return super.onOptionsItemSelected(item);
     }
+
+
 }
