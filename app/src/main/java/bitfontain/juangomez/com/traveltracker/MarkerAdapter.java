@@ -1,7 +1,9 @@
 package bitfontain.juangomez.com.traveltracker;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.GoogleMap;
@@ -15,6 +17,8 @@ import java.util.HashMap;
 //The adapter creates the view for us
 public class MarkerAdapter implements GoogleMap.InfoWindowAdapter {
 
+    private static final String TAG = "MarkerAdapter";
+
     private LayoutInflater mLayoutInflater;
     private View mView;
     private HashMap<String, Memory> mMemories;
@@ -27,6 +31,7 @@ public class MarkerAdapter implements GoogleMap.InfoWindowAdapter {
     }
 
     /***** This two methods comes from this interface InfoWindowAdapter **************/
+
     //It is going to keep the square pop up but it is going to change the content
     @Override
     public View getInfoContents(Marker marker) {
@@ -36,9 +41,10 @@ public class MarkerAdapter implements GoogleMap.InfoWindowAdapter {
             mView = mLayoutInflater.inflate(R.layout.marker, null);
         }
 
+        //Get memory class from the hash map using the id of the marker
         Memory memory = mMemories.get(marker.getId());
 
-        //We populate the view with any data that we get from the marker
+        //We populate the view with any data that we get from the memory class
         TextView titleView  =  (TextView)mView.findViewById(R.id.title);
         titleView.setText(memory.city);
         //titleView.setText(marker.getTitle());
@@ -48,6 +54,15 @@ public class MarkerAdapter implements GoogleMap.InfoWindowAdapter {
 
         TextView notesView  =  (TextView)mView.findViewById(R.id.notes);
         notesView.setText(memory.notes);
+
+        //It doesn't word here because this windows generates an image info not a view
+        /*Button removeButton = (Button)mView.findViewById(R.id.remove_button);
+        removeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "Clicked remove button");
+            }
+        });*/
 
         return mView;
     }

@@ -3,27 +3,18 @@
               android:orientation="vertical"
               android:layout_width="match_parent"
               android:layout_height="match_parent">
-  <TextView
-    android:id="@+id/title"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"/>
 
   <TextView
-    android:id="@+id/snipet"
+    android:id="@+id/city"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"/>
-
   <TextView
+    android:id="@+id/country"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"/>
+  <EditText
     android:id="@+id/notes"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"/>
-
-  <!--We can't interact with the info window because everything that is display turns into an image. It is not a view anymore.
-      We need to do it in the onMapReady() in the MainActivity-->
-  <!--<Button
-    android:id="@+id/remove_button"
-    android:text="Remove"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"/>-->
 
 </LinearLayout>
